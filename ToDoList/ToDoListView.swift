@@ -6,27 +6,46 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ToDoListView: View {
-    var toDos = ["Learn Swift", "Build Apps", "Change the World", "Bring the Awesome", "Take a Vacation", "Be the best Chigozie"]
+    @Query var toDos: [ToDo]
+    @State private var sheetIsPresented = false
+    
     var body: some View {
         NavigationStack {
             List {
-                ForEach(toDos, id: \.self) { toDo in
+                ForEach(toDos) { toDo in
                     NavigationLink {
-                        DetailView(passedValue: toDo)
+                        DetailView(toDo: toDo)
                     } label: {
-                        Text(toDo)
+                        Text(toDo.item)
                     }
+                    .font(.title2)
                 }
             }
             .navigationTitle("To Do List")
             .navigationBarTitleDisplayMode(.automatic)
             .listStyle(.plain)
+            .sheet(isPresented: $sheetIsPresented) {
+                NavigationStack {
+                    DetailView(toDo: ToDo())
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        sheetIsPresented.toggle()
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
     ToDoListView()
+        .modelContainer(for: ToDo.self, inMemory: true)
 }
